@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:convert'; // Untuk mengelola JSON
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:product_app/product_detail.dart';
+
 
 
 class HomePage extends StatefulWidget {
@@ -50,6 +52,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Format harga
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+
     return Scaffold(
       backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
       appBar: AppBar(
@@ -90,7 +99,8 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(
-                  "Rp ${product['price']}",
+                  currencyFormat.format(product['price']),
+                  // "Rp ${product['price']}",
                   style: TextStyle(color: Colors.white70),
                 ),
                 trailing: Icon(Icons.keyboard_arrow_right, color: Colors.white, size: 30.0),

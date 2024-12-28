@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class DetailProdukPage extends StatefulWidget {
   final int productId;
@@ -23,7 +24,6 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
     fetchProductDetail();
   }
 
-  // Fungsi untuk mengambil data produk dari API
   Future<void> fetchProductDetail() async {
     setState(() {
       isLoading = true;
@@ -60,6 +60,13 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Format harga
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -83,61 +90,64 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Gambar produk dengan overlay
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  height: 250,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12.0),
-                    image: DecorationImage(
-                      image: product['image_url'] != null
-                          ? NetworkImage(product['image_url'])
-                          : AssetImage('assets/product.jpg') as ImageProvider,
-                      fit: BoxFit.cover,
-                    ),
+            // Gambar produk
+            Container(
+              height: 250,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 7,
+                    offset: Offset(0, 3),
                   ),
+                ],
+                image: DecorationImage(
+                  image: product['image_url'] != null
+                      ? NetworkImage(product['image_url'])
+                      : AssetImage('assets/product${widget.productId % 5 + 1}.jpg') as ImageProvider,
+                  fit: BoxFit.cover,
                 ),
-                Column(
-                  children: [
-                    Text(
-                      product['name'] ?? 'Nama produk tidak tersedia',
-                      style: TextStyle(
-                        fontSize: 24.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            offset: Offset(1.5, 1.5),
-                            blurRadius: 3.0,
-                            color: Colors.black,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      "Rp ${product['price'] ?? 0}",
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            offset: Offset(1.5, 1.5),
-                            blurRadius: 3.0,
-                            color: Colors.black,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
             SizedBox(height: 16.0),
+            // Nama dan harga produk
+            Text(
+              product['name'] ?? 'Nama produk tidak tersedia',
+              style: TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+                color: Color.fromRGBO(58, 66, 86, 1.0),
+              ),
+            ),
+            SizedBox(height: 8.0),
+            Text(
+              currencyFormat.format(product['price']),
+              // "Rp ${product['price'] ?? 0}",
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            ),
+            SizedBox(height: 16.0),
+            Divider(),
+            SizedBox(height: 16.0),
             // Deskripsi produk
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Deskripsi Produk",
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromRGBO(58, 66, 86, 1.0),
+                ),
+              ),
+            ),
+            SizedBox(height: 8.0),
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -147,13 +157,16 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
               ),
             ),
             SizedBox(height: 20.0),
+            Divider(),
+            SizedBox(height: 16.0),
             // Tombol "Add to Cart"
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: () {
                 print("Add to Cart pressed");
               },
-              child: Text(
-                "Add to Cart",
+              icon: Icon(Icons.add_shopping_cart),
+              label: Text(
+                "Add To Cart",
                 style: TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
@@ -161,46 +174,66 @@ class _DetailProdukPageState extends State<DetailProdukPage> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-                padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 12.0),
+                backgroundColor: Colors.grey,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 30.0,
+                  vertical: 12.0,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
             ),
             SizedBox(height: 20.0),
+            Divider(),
+            SizedBox(height: 16.0),
             // Review produk
-            if (reviews.isNotEmpty) ...[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Reviews:",
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Ulasan Pelanggan",
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromRGBO(58, 66, 86, 1.0),
                 ),
               ),
-              SizedBox(height: 10.0),
+            ),
+            SizedBox(height: 10.0),
+            if (reviews.isNotEmpty)
               ...reviews.map((review) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      review['review']['comment'] ?? 'Tidak ada komentar',
-                      style: TextStyle(fontSize: 16.0),
+                return Card(
+                  elevation: 3,
+                  margin: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          review['review']['comment'] ??
+                              'Tidak ada komentar',
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                        SizedBox(height: 4.0),
+                        Row(
+                          children: List.generate(5, (index) {
+                            return Icon(
+                              index <
+                                  (review['review']['ratings'] ?? 0)
+                                  ? Icons.star
+                                  : Icons.star_border,
+                              color: Colors.amber,
+                              size: 20.0,
+                            );
+                          }),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 4.0),
-                    Row(
-                      children: List.generate(5, (index) {
-                        return Icon(
-                          index < (review['review']['ratings'] ?? 0)
-                              ? Icons.star
-                              : Icons.star_border,
-                          color: Colors.amber,
-                          size: 20.0,
-                        );
-                      }),
-                    ),
-                    SizedBox(height: 10.0),
-                  ],
+                  ),
                 );
-              }).toList(),
-            ] else
+              }).toList()
+            else
               Text(
                 "Belum ada ulasan.",
                 style: TextStyle(fontSize: 16.0),
